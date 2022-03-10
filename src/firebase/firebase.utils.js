@@ -40,14 +40,39 @@ const config = {
 };
 
 
-  firebase.initializeApp(config);
+export const addCollectionAndDocuments = async (collectionKey, objectsToAdd) => {
+    const collectionRef = firestore.collection(collectionKey);
 
-  export const auth = firebase.auth();
-  export const firestore = firebase.firestore();
+    const batch = firestore.batch();
+    objectsToAdd.forEach(obj =>{
+        const newDocRef = collectionRef.doc();
+        batch.set(newDocRef, obj);
+    });
 
-  const provider = new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({ prompt :'select_account'});
-  export const signInWithGoogle = () =>auth.signInWithPopup(provider);
+    return await batch.commit();
+}
+
+    const convertCollectionsSnapshotToMap =(collections)=>{
+        const transformedColletcion = collections.docs.map(doc =>{
+            const{ title, items }  = doc.data();
+
+            return{
+                routeName: encodeURI(title.toLowerCase()),
+                id: doc.id, 
+                title,
+                items
+            }
+        })
+
+        
+    }
+
+    export const auth = firebase.auth();
+    export const firestore = firebase.firestore();
+
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt :'select_account'});
+    export const signInWithGoogle = () =>auth.signInWithPopup(provider);
 
 
-  export default firebase;
+    export default firebase;
